@@ -8,8 +8,7 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
-responces = []
-next_question =0
+
 
 
 @app.get("/")
@@ -18,6 +17,8 @@ def survey_start():
 
     instructions = survey.instructions
     title = survey.title
+    session['responses'] = []
+    session['next_question'] = 0
 
     return render_template("survey_start.html",
         title=title,instructions=instructions)
@@ -33,19 +34,19 @@ def show_questions(question_nmbr):
     """ Displays the question based on the index input into the url"""
     question = survey.questions[int(question_nmbr)].question
     choices = survey.questions[int(question_nmbr)].choices
-    global next_question
-    next_question+=1
+    session['next_question'] += 1
 
-    return render_template('question.html', question_text=question, choices=choices)
-    # if int(question) < len(survey.questions) - 1:
-    #     return redirect(f'/question/{int(question) + 1}',
-    #     question.question= survey.questions[int(question) + 1].question)
+    if session['next_question'] < len(survey.questions):
+         return render_template('question.html', question_text=question, choices=choices)
+    else:
+        return render_template('completion.html')
+   #return render_template('question.html', question_text=question, choices=choices)
 
 @app.post("/answer")
 def record_redirect():
 
     answer = request.form['answer']
-    global responces
-    responces.append(answer)
-    global next_question
+    session['responses'] += [answer]
+    next_question = session['next_question']
+    
     return redirect(f'/questions/{next_question}')
