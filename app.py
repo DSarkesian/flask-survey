@@ -28,7 +28,7 @@ def send_to_question():
 @app.get('/questions/<question_nmbr>')
 def show_questions(question_nmbr):
     """ Displays the question based on the index input into the url"""
-    if not int(question_nmbr) == session["next_question"]:
+    if not int(question_nmbr) == len(session['responses']):
         correct_question = session["next_question"]
         flash('Accessing invalid question.')
         return redirect(f'/questions/{correct_question}')
@@ -49,6 +49,6 @@ def record_redirect():
     """
     answer = request.form['answer']
     session['responses'] += [answer]
-    next_question = session['next_question']
+    next_question = len(session['responses'])
 
     return redirect(f'/questions/{next_question}')
