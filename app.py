@@ -1,3 +1,4 @@
+from http.client import responses
 from flask import Flask, request, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from surveys import satisfaction_survey as survey
@@ -32,12 +33,25 @@ def send_to_question():
 @app.get('/questions/<question_nmbr>')
 def show_questions(question_nmbr):
     """ Displays the question based on the index input into the url"""
-    question = survey.questions[int(question_nmbr)].question
-    choices = survey.questions[int(question_nmbr)].choices
-    session['next_question'] += 1
 
-    if session['next_question'] < len(survey.questions):
-         return render_template('question.html', question_text=question, choices=choices)
+
+    if session["next_question"]> len(survey.questions):
+        return render_template('completion.html')
+
+    if not int(question_nmbr) == session["next_question"]:
+        correct_question = session["next_question"]
+        return redirect(f'/questions/{correct_question}')
+
+
+
+
+
+    if int(question_nmbr) < len(survey.questions):
+        question = survey.questions[int(question_nmbr)].question
+        choices = survey.questions[int(question_nmbr)].choices
+        session['next_question'] += 1
+        return render_template('question.html', question_text=question, choices=choices)
+
     else:
         return render_template('completion.html')
    #return render_template('question.html', question_text=question, choices=choices)
@@ -48,5 +62,5 @@ def record_redirect():
     answer = request.form['answer']
     session['responses'] += [answer]
     next_question = session['next_question']
-    
+
     return redirect(f'/questions/{next_question}')
