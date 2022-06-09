@@ -9,6 +9,8 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 debug = DebugToolbarExtension(app)
 
 responces = []
+next_question =0
+
 
 @app.get("/")
 def survey_start():
@@ -31,8 +33,19 @@ def show_questions(question_nmbr):
     """ Displays the question based on the index input into the url"""
     question = survey.questions[int(question_nmbr)].question
     choices = survey.questions[int(question_nmbr)].choices
-    
+    global next_question
+    next_question+=1
+
     return render_template('question.html', question_text=question, choices=choices)
     # if int(question) < len(survey.questions) - 1:
-    #     return redirect(f'/question/{int(question) + 1}', 
+    #     return redirect(f'/question/{int(question) + 1}',
     #     question.question= survey.questions[int(question) + 1].question)
+
+@app.post("/answer")
+def record_redirect():
+
+    answer = request.form['answer']
+    global responces
+    responces.append(answer)
+    global next_question
+    return redirect(f'/questions/{next_question}')
