@@ -4,11 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Flask Survey</title>
+
+  <title>{% block title %}Flask Survey{% endblock %}</title>
 </head>
 <body>
 
+  {% for msg in get_flashed_messages() %}
+  <p>{{ msg }}</p>
+  {% endfor %}
+
 {% block content %}
+
 {% endblock %}
 
 </body>

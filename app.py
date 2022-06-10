@@ -12,32 +12,29 @@ debug = DebugToolbarExtension(app)
 @app.get("/")
 def survey_start():
     """Returns survey start html template"""
-    instructions = survey.instructions
-    title = survey.title
-    session['responses'] = []
-    session['next_question'] = 0
 
     return render_template("survey_start.html",
-        title=title,instructions=instructions)
+        title=survey.title,instructions=survey.instructions)
 
 @app.post('/begin')
 def send_to_question():
     """ Redirects to the url to show the first question """
+    session['responses'] = []
     return redirect(f"/questions/0")
 
-@app.get('/questions/<question_nmbr>')
-def show_questions(question_nmbr):
-    """ Displays the question based on the index input into the url"""
-    if not int(question_nmbr) == len(session['responses']):
-        correct_question = session["next_question"]
+@app.get('/questions/<int:question_num>')
+def show_questions(question_num):
+    """ Displays the question based on the index input into the url if survey is complete
+    shows completion.html or redirects to right question if user skips question"""
+    if not int(question_num) == len(session['responses']):
+        correct_question_num = len(session['responses'])
         flash('Accessing invalid question.')
-        return redirect(f'/questions/{correct_question}')
+        return redirect(f'/questions/{correct_question_num}')
 
-    if int(question_nmbr) < len(survey.questions):
-        question = survey.questions[int(question_nmbr)].question
-        choices = survey.questions[int(question_nmbr)].choices
-        session['next_question'] += 1
-        return render_template('question.html', question_text=question, choices=choices)
+    if int(question_num) < len(survey.questions):
+        question = survey.questions[int(question_num)].question
+        choices = survey.questions[int(question_num)].choices
+        return render_template('question.html', question_text=question, choices=choices,question_num=question_num+1)
 
     else:
         return render_template('completion.html')
@@ -49,6 +46,6 @@ def record_redirect():
     """
     answer = request.form['answer']
     session['responses'] += [answer]
-    next_question = len(session['responses'])
+    question_num = len(session['responses'])
 
-    return redirect(f'/questions/{next_question}')
+    return redirect(f'/questions/{question_num}')
